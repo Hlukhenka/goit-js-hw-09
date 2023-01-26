@@ -46,7 +46,6 @@ function onClickStart() {
     updateClockFace(convertedDate);
     if (ms <= 0) {
       clearInterval(intervalId);
-      stop(updateClockFace);
     }
   });
 }
