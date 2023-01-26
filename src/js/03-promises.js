@@ -13,11 +13,9 @@ refs.submit.addEventListener('click', onClickSubmit);
 function onClickSubmit(e) {
   e.preventDefault();
 
-  let delay = refs.delay.value;
-  const step = refs.step.value;
-  const amount = refs.amount.value;
-  refs.delay.value = refs.step.value = refs.amount.value = '';
-  delay = +delay;
+  let delay = +refs.delay.value;
+  const step = +refs.step.value;
+  const amount = +refs.amount.value;
 
   for (let i = 0; i < amount; i += 1) {
     let position = i + 1;
@@ -28,7 +26,7 @@ function onClickSubmit(e) {
       .catch(({ position, delay }) => {
         Notiflix.Notify.failure(`Rejected promise ${position} in ${delay}ms`);
       });
-    delay = +step;
+    delay += step;
   }
 }
 

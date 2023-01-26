@@ -14,9 +14,10 @@ const refs = {
 
 refs.startBtn.addEventListener('click', onClickStart);
 
-refs.inputEl.addEventListener('input', onChangeIput);
-
 refs.startBtn.setAttribute('disabled', '');
+
+let intervalId = null;
+
 const options = {
   enableTime: true,
   time_24hr: true,
@@ -29,43 +30,50 @@ const options = {
       options.defaultDate = selectedDates[0];
       refs.startBtn.removeAttribute('disabled');
     }
+    if (intervalId <= 0) {
+      clearInterval(intervalId);
+    }
   },
 };
 
 flatpickr(refs.inputEl, options);
 
-let selectedDate = null;
-let currentDate = null;
-
 function onClickStart() {
-  intervalId();
-}
-
-function onChangeIput(e) {
-  selectedDate = new Date(e.currentTarget.value);
-  currentDate = Date.now();
-}
-
-function intervalId() {
-  setInterval(() => {
-    convertMs();
-    refs.startBtn.setAttribute('disabled', '');
-  }, 1000);
-}
-
-function convertMs() {
-  const ms = selectedDate - Date.now();
-  const days = addLeadingZero(Math.floor(ms / (1000 * 60 * 60 * 24)));
-  const hours = addLeadingZero(Math.floor((ms / (1000 * 60 * 60)) % 24));
-  const minutes = addLeadingZero(Math.floor((ms / (1000 * 60)) % 60));
-  const seconds = addLeadingZero(Math.floor((ms / 1000) % 60));
-  refs.inputHours.textContent = hours;
-  refs.inputMinutes.textContent = minutes;
-  refs.inputSeconds.textContent = seconds;
-  refs.inputDays.textContent = days;
+  intervalId = setInterval(() => {
+    const selectedDate = refs.inputEl.value;
+    const ms = new Date(selectedDate) - Date.now();
+    const convertedDate = convertMs(ms);
+    updateClockFace(convertedDate);
+    if (ms <= 0) {
+      clearInterval(intervalId);
+      stop(updateClockFace);
+    }
+  });
 }
 
 function addLeadingZero(value) {
   return String(value).padStart(2, '0');
 }
 
+function convertMs(ms) {
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
+
+  const days = addLeadingZero(Math.floor(ms / day));
+  const hours = addLeadingZero(Math.floor((ms % day) / hour));
+  const minutes = addLeadingZero(Math.floor(((ms % day) % hour) / minute));
+  const seconds = addLeadingZero(
+    Math.floor((((ms % day) % hour) % minute) / second)
+  );
+
+  return { days, hours, minutes, seconds };
+}
+
+function updateClockFace({ days, hours, minutes, seconds }) {
+  refs.inputDays.textContent = days;
+  refs.inputHours.textContent = hours;
+  refs.inputMinutes.textContent = minutes;
+  refs.inputSeconds.textContent = seconds;
+}
